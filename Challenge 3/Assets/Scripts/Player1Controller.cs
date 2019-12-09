@@ -13,7 +13,9 @@ public class Player1Controller : MonoBehaviour
     public float speed;
     public float tilt;
     public Boundary boundary;
+    public int power;
 
+    public GameObject powershot;
     public GameObject shot;
     public Transform shotSpawn;
     public float fireRate;
@@ -33,10 +35,21 @@ public class Player1Controller : MonoBehaviour
     {
         if (Input.GetButton("Fire1") && Time.time > nextFire)
         {
-            nextFire = Time.time + fireRate;
-            Instantiate(shot, shotSpawn.position, shotSpawn.rotation);
-            audio.Play();
-            
+            if (power == 0)
+            {
+                nextFire = Time.time + fireRate;
+                Instantiate(shot, shotSpawn.position, shotSpawn.rotation);
+                audio.Play();
+                speed = 10.0f;
+            }
+            if (power > 0)
+            {
+                nextFire = Time.time + fireRate;
+                Instantiate(powershot, shotSpawn.position, shotSpawn.rotation);
+                audio.Play();
+                power -= 1;
+                speed = 20.0f;
+            }
         }
     }
     void FixedUpdate()

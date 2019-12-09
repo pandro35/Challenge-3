@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class DestroyByContact : MonoBehaviour
 {
@@ -8,23 +9,52 @@ public class DestroyByContact : MonoBehaviour
     public GameObject playerExplosion;
     public int scoreValue;
     private GameController gameController;
+    private GCH gch;
+    private Player1Controller p1c;
+    private Player1Controller p1c2;
 
     void Start()
     {
-        GameObject gameControllerObject = GameObject.FindWithTag("GameController");
-        if(gameControllerObject != null)
+        if (SceneManager.GetActiveScene().buildIndex == 0)
         {
-            gameController = gameControllerObject.GetComponent<GameController>();
+            GameObject gameControllerObject = GameObject.FindWithTag("GameController");
+            if (gameControllerObject != null)
+            {
+                gameController = gameControllerObject.GetComponent<GameController>();
+            }
+            if (gameController == null)
+            {
+                Debug.Log("Cannot find 'GameController' Script");
+            }
+            GameObject playerControllerObject = GameObject.FindWithTag("Player");
+            if (playerControllerObject != null)
+            {
+                p1c = playerControllerObject.GetComponent<Player1Controller>();
+            }
         }
-        if (gameController == null)
+        else
         {
-            Debug.Log("Cannot find 'GameController' Script");
+            GameObject gameControllerObject2 = GameObject.FindWithTag("GCH");
+            if (gameControllerObject2 != null)
+            {
+                gch = gameControllerObject2.GetComponent<GCH>();
+            }
+            if (gch == null)
+            {
+                Debug.Log("Cannot find 'GCH' Script");
+            }
+
+            GameObject playerControllerObject2 = GameObject.FindWithTag("Player");
+            if (playerControllerObject2 != null)
+            {
+                p1c2 = playerControllerObject2.GetComponent<Player1Controller>();
+            }
         }
     }
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Boundary") || other.CompareTag("Enemy"))
+        if (other.CompareTag("Boundary") || other.CompareTag("Enemy") || other.CompareTag("PowerUp"))
         {
             return;
         }
@@ -33,15 +63,60 @@ public class DestroyByContact : MonoBehaviour
         {
             Instantiate(explosion, transform.position, transform.rotation);
         }
-        
-        if (other.tag == "Player")
+
+        if (SceneManager.GetActiveScene().buildIndex == 0)
         {
-            Instantiate(playerExplosion, other.transform.position, other.transform.rotation);
-            gameController.GameOver();
+            if (gameController.score < 100)
+            {
+                if (other.tag == "Player" && this.tag != "PowerUp")
+                {
+                    Instantiate(playerExplosion, other.transform.position, other.transform.rotation);
+                    gameController.GameOver();
+                    gameController.AddScore(scoreValue);
+                    Destroy(other.gameObject);
+                    Destroy(gameObject);
+
+                }
+
+                else if (other.tag == "Player" && this.tag == "PowerUp")
+                {
+                    p1c.power = 5;
+                    Destroy(gameObject);
+                }
+                else
+                {
+                    gameController.AddScore(scoreValue);
+                    Destroy(other.gameObject);
+                    Destroy(gameObject);
+                }
+            }
         }
-        gameController.AddScore(scoreValue);
-        Destroy(other.gameObject);
-        Destroy(gameObject);
-        
+        else
+        {
+            if (gch.score < 100)
+            {
+                if (other.tag == "Player" && this.tag != "PowerUp")
+                {
+                    Instantiate(playerExplosion, other.transform.position, other.transform.rotation);
+                    gch.GameOver();
+                    gch.AddScore(scoreValue);
+                    Destroy(other.gameObject);
+                    Destroy(gameObject);
+                }
+                
+                else if (other.tag == "Player" && this.tag == "PowerUp")
+                {
+                    p1c2.power = 5;
+                    Destroy(gameObject);
+                }
+                else
+                {
+                    gch.AddScore(scoreValue);
+                    Destroy(other.gameObject);
+                    Destroy(gameObject);
+                }
+            }
+        }
     }
+    
 }

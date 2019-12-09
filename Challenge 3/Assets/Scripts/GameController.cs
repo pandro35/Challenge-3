@@ -6,10 +6,12 @@ using UnityEngine.SceneManagement;
 
 public class GameController : MonoBehaviour
 {
+    public BGScroller bgscroller;
     public GameObject[] hazards;
     public Vector3 spawnValues;
     public int hazardCount;
     public float spawnWait;
+    public float speedWait;
     public float startWait;
     public float waveWait;
 
@@ -17,10 +19,18 @@ public class GameController : MonoBehaviour
     public Text RestartText;
     public Text GameOverText;
     public Text winText;
-    private int score;
+    public int score;
 
     private bool gameOver;
     private bool restart;
+
+    public AudioSource BGM;
+    public AudioClip winMusic;
+    public AudioClip loseMusic;
+
+    public GameObject slowStars;
+    public GameObject fastStars;
+    public GameObject bigStars;
 
     void Start()
     {
@@ -48,6 +58,16 @@ public class GameController : MonoBehaviour
                 SceneManager.LoadScene("Main");
             }
         }
+
+        if (Input.GetKey(KeyCode.H))
+        {
+            SceneManager.LoadScene(1);
+        }
+
+        if (Input.GetKey(KeyCode.E))
+        {
+            SceneManager.LoadScene(0);
+        }
     }
 
     IEnumerator SpawnWaves()
@@ -74,6 +94,7 @@ public class GameController : MonoBehaviour
         }
     }
 
+
     public void AddScore(int newScoreValue)
     {
         score += newScoreValue;
@@ -96,11 +117,23 @@ public class GameController : MonoBehaviour
     {
         if (score >= 100)
         {
-            GameOverText.text = "Game Created by Alejandro Porras";
+            GameOverText.text = "Game Created by Alejandro Porras. Win Music by Patrick de Arteaga";
+            bgscroller.scrollSpeed = -50;
+            slowStars.SetActive(false);
+            fastStars.SetActive(true);
+            BGM.Stop();
+            BGM.clip = winMusic;
+            BGM.Play();
         }
         else
         {
-            GameOverText.text = "Game Over! Created by Alejandro Porras";
+            GameOverText.text = "Game Over! Created by Alejandro Porras. Lose Music by Patrick de Arteaga";
+            bgscroller.scrollSpeed = 0;
+            slowStars.SetActive(false);
+            bigStars.SetActive(true);
+            BGM.Stop();
+            BGM.clip = loseMusic;
+            BGM.Play();
         }
         gameOver = true;
     }
